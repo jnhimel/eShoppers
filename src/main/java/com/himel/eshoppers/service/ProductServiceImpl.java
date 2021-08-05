@@ -1,5 +1,6 @@
 package com.himel.eshoppers.service;
 
+import com.himel.eshoppers.domain.Product;
 import com.himel.eshoppers.dto.ProductDTO;
 import com.himel.eshoppers.repository.ProductRepository;
 
@@ -16,6 +17,19 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> findAllProductSortedByName() {
-        return productRepository.findAllProducts().stream().sorted(Comparator.comparing(ProductDTO::getName)).collect(Collectors.toList());
+        return productRepository.findAllProducts()
+                .stream()
+                .map(this::convertToDTO)
+                .sorted(Comparator.comparing(ProductDTO::getName))
+                .collect(Collectors.toList());
+    }
+
+    private ProductDTO convertToDTO(Product product){
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice()
+        );
     }
 }
