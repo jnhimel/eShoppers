@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User verifyUser(LoginDTO loginDTO) throws UserNotFoundException {
+    public User verifyUser(LoginDTO loginDTO){
         var user = userRepository.findByUsername(loginDTO.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found by " + loginDTO.getUsername()));
         var encrypted = encryptPassword(loginDTO.getPassword());
 

@@ -9,5 +9,5 @@ public interface UserService {
     void saveUser(UserDTO userDTO);
     String encryptPassword(String password);
     boolean isNotUniqueUsername(UserDTO user);
-    User verifyUser(LoginDTO loginDTO) throws UserNotFoundException;
+    User verifyUser(LoginDTO loginDTO);
 }

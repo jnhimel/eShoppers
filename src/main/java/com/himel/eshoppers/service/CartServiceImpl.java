@@ -22,7 +22,10 @@ public class CartServiceImpl implements CartService{
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductRepository productRepository, CartItemRepository cartItemRepository) {
+    public CartServiceImpl(
+            CartRepository cartRepository,
+            ProductRepository productRepository,
+            CartItemRepository cartItemRepository) {
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
         this.cartItemRepository = cartItemRepository;
@@ -47,7 +50,8 @@ public class CartServiceImpl implements CartService{
         }
         Long id = parseProductId(productId);
 
-        Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product not found by id: "+id));
+        Product product = productRepository.findById(id).orElseThrow(() ->
+                new ProductNotFoundException("Product not found by id: "+id));
 
         addProductToCart(product,cart);
         Integer totalItem = getTotalItem(cart);
@@ -59,7 +63,8 @@ public class CartServiceImpl implements CartService{
     }
 
     private void addProductToCart(Product product, Cart cart){
-        var cartItemOptional = findSimilarProductInCart(cart, product);
+        var cartItemOptional
+                = findSimilarProductInCart(cart, product);
 
         var cartItem = cartItemOptional
                 .map(this::increaseQuantityByOne)
@@ -98,11 +103,17 @@ public class CartServiceImpl implements CartService{
     }
 
     private Integer getTotalItem(Cart cart) {
-        return cart.getCartItems().stream().map(CartItem::getQuantity).reduce(0,Integer::sum);
+        return cart.getCartItems()
+                .stream()
+                .map(CartItem::getQuantity)
+                .reduce(0,Integer::sum);
     }
 
     private BigDecimal calculateTotalPrice(Cart cart) {
-        return cart.getCartItems().stream().map(CartItem::getPrice).reduce(BigDecimal.ZERO,BigDecimal::add);
+        return cart.getCartItems()
+                .stream()
+                .map(CartItem::getPrice)
+                .reduce(BigDecimal.ZERO,BigDecimal::add);
     }
 
     private Long parseProductId(String productId) {

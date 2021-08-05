@@ -17,6 +17,7 @@ public class UserRepositoryImpl implements UserRepository{
 
     @Override
     public Optional<User> findByUsername(String username) {
-        return USERS.stream().filter(user -> Objects.equals(user.getUsername(),username)).findFirst();
+        return USERS.stream().filter(user ->
+                Objects.equals(user.getUsername(),username)).findFirst();
     }
 }

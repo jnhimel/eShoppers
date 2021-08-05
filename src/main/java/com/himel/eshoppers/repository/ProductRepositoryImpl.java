@@ -47,6 +47,7 @@ public class ProductRepositoryImpl implements ProductRepository{
 
     @Override
     public Optional<Product> findById(Long productId) {
-        return findAllProducts().stream().filter(product -> product.getId().equals(productId)).findFirst();
+        return findAllProducts().stream().filter(product ->
+                product.getId().equals(productId)).findFirst();
     }
 }
