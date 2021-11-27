@@ -20,4 +20,9 @@ public class CartItemRepositoryImpl implements CartItemRepository{
         CARTS.add(cartItem);
         return cartItem;
     }
+
+    @Override
+    public void remove(CartItem cartItem) {
+        CARTS.remove(cartItem);
+    }
 }

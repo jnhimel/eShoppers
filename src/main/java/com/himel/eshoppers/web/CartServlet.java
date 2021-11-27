@@ -2,6 +2,7 @@ package com.himel.eshoppers.web;
 
 import com.himel.eshoppers.domain.Cart;
 import com.himel.eshoppers.domain.User;
+import com.himel.eshoppers.enums.Action;
 import com.himel.eshoppers.exceptions.ProductNotFoundException;
 import com.himel.eshoppers.repository.CartItemRepositoryImpl;
 import com.himel.eshoppers.repository.CartRepositoryImpl;
@@ -9,6 +10,7 @@ import com.himel.eshoppers.repository.ProductRepositoryImpl;
 import com.himel.eshoppers.service.CartService;
 import com.himel.eshoppers.service.CartServiceImpl;
 import com.himel.eshoppers.util.SecurityContext;
+import com.himel.eshoppers.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +31,15 @@ public class CartServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         var productId = req.getParameter("productId");
-        LOGGER.info("Received request to add product with id: {}", productId);
+        var action = req.getParameter("action");
         var cart = getCart(req);
-        try {
-            cartService.addProductToCart(productId,cart);
-        } catch (ProductNotFoundException e) {
-            LOGGER.error("Error",e);
+        if(StringUtil.isNotEmpty(action)){
+            processCart(productId, action, cart);
+            resp.sendRedirect("/checkout");
+            return;
         }
+        LOGGER.info("Received request to add product with id: {} to cart", productId);
+        cartService.addProductToCart(productId,cart);
         resp.sendRedirect("/home");
     }
 
@@ -43,6 +47,22 @@ public class CartServlet extends HttpServlet {
     private Cart getCart(HttpServletRequest req) {
         final User currentUser = SecurityContext.getCurrentUser(req);
         return cartService.getCartByUser(currentUser);
+    }
+
+    private void processCart(String productId, String action, Cart cart){
+        switch (Action.valueOf(action.toUpperCase())){
+            case ADD:
+                LOGGER.info("Received request to add product with id: {} to cart", productId);
+                cartService.addProductToCart(productId,cart);
+                break;
+            case REMOVE:
+                LOGGER.info("Received request to remove product with id: {} to cart", productId);
+                cartService.removeProductFromCart(productId,cart);
+                break;
+            case REMOVEALL:
+                LOGGER.info("Received request to remove all product with id: {} to cart", productId);
+                cartService.removeAllProductByProductIdFromCart(productId,cart);
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import com.himel.eshoppers.domain.Cart;
 import com.himel.eshoppers.domain.CartItem;
 import com.himel.eshoppers.domain.Product;
 import com.himel.eshoppers.domain.User;
+import com.himel.eshoppers.exceptions.CartItemNotFoundException;
 import com.himel.eshoppers.exceptions.ProductNotFoundException;
 import com.himel.eshoppers.repository.CartItemRepository;
 import com.himel.eshoppers.repository.CartRepository;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CartServiceImpl implements CartService{
 
@@ -45,13 +47,7 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public void addProductToCart(String productId, Cart cart) {
-        if(productId == null || productId.length() == 0){
-            throw new IllegalArgumentException("Product id cannot be null");
-        }
-        Long id = parseProductId(productId);
-
-        Product product = productRepository.findById(id).orElseThrow(() ->
-                new ProductNotFoundException("Product not found by id: "+id));
+        Product product = findProduct(productId);
 
         addProductToCart(product,cart);
         Integer totalItem = getTotalItem(cart);
@@ -60,6 +56,28 @@ public class CartServiceImpl implements CartService{
         cart.setTotalItem(totalItem);
         cart.setTotalPrice(totalPrice);
         cartRepository.save(cart);
+    }
+
+    @Override
+    public void removeProductFromCart(String productId, Cart cart) {
+        Product product = findProduct(productId);
+        removeProductFromCart(product,cart);
+        updateCart(cart);
+    }
+
+    @Override
+    public void removeAllProductByProductIdFromCart(String productId, Cart cart) {
+        Product product = findProduct(productId);
+        removeAllProductByProductIdFromCart(product,cart);
+        updateCart(cart);
+    }
+
+    private void updateCart(Cart cart) {
+        Integer totalItem = getTotalItem(cart);
+        BigDecimal totalPrice = calculateTotalPrice(cart);
+        cart.setTotalItem(totalItem);
+        cart.setTotalPrice(totalPrice);
+        cartRepository.update(cart);
     }
 
     private void addProductToCart(Product product, Cart cart){
@@ -71,6 +89,39 @@ public class CartServiceImpl implements CartService{
                 .orElseGet(() ->
                         createNewShoppingCartItem(product));
         cart.getCartItems().add(cartItem);
+    }
+
+    private void removeProductFromCart(Product productToRemove, Cart cart){
+        var itemOptional = cart.getCartItems().stream().filter(cartItem -> cartItem.getProduct().equals(productToRemove)).findAny();
+        var cartItem = itemOptional.orElseThrow(() -> new CartItemNotFoundException("Cart not found by product: "+productToRemove));
+        if(cartItem.getQuantity()>1){
+            cartItem.setQuantity(cartItem.getQuantity() - 1);
+            cartItem.setPrice(cartItem.getPrice().subtract(productToRemove.getPrice()));
+            cart.getCartItems().add(cartItem);
+            cartItemRepository.update(cartItem);
+        } else {
+            cart.getCartItems().remove(cartItem);
+            cartItemRepository.remove(cartItem);
+        }
+
+    }
+
+    private void removeAllProductByProductIdFromCart(Product productToRemove, Cart cart){
+        var itemOptional = cart.getCartItems().stream().filter(cartItem -> cartItem.getProduct().equals(productToRemove)).findAny();
+        var cartItem = itemOptional.orElseThrow(() -> new CartItemNotFoundException("Cart not found by product: "+productToRemove));
+        cart.getCartItems().remove(cartItem);
+        cartItemRepository.remove(cartItem);
+    }
+
+
+    private Product findProduct(String productId){
+        if(productId == null || productId.length() == 0){
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
+        Long id = parseProductId(productId);
+
+        return productRepository.findById(id).orElseThrow(() ->
+                new ProductNotFoundException("Product not found by id: "+id));
     }
 
     private CartItem createNewShoppingCartItem(Product product) {

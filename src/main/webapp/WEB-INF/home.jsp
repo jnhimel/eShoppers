@@ -6,6 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ taglib prefix="sec" uri="http://himel.com/functions" %>
+
 <%@include file="includes/header.jsp"%>
 
 <%@include file="includes/navigation.jsp"%>
@@ -29,7 +30,7 @@
                         <div class="card-body">
                             <p>Total Item: <span class="badge badge-pill badge-success"><c:out value="${cart.totalItem}"/></span></p>
                             <p>Total Price: $ <c:out value="${cart.totalPrice}"/></p>
-                            <p><a class="btn btn-outline-info" href="#">Checkout</a></p>
+                            <p><a href="<c:url value="/checkout"/>" class="btn btn-outline-info">Checkout</a></p>
                         </div>
                     </div>
                 </c:if>
