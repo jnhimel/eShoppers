@@ -3,7 +3,6 @@ package com.himel.eshoppers.web;
 import com.himel.eshoppers.domain.Cart;
 import com.himel.eshoppers.domain.User;
 import com.himel.eshoppers.enums.Action;
-import com.himel.eshoppers.exceptions.ProductNotFoundException;
 import com.himel.eshoppers.repository.CartItemRepositoryImpl;
 import com.himel.eshoppers.repository.CartRepositoryImpl;
 import com.himel.eshoppers.repository.ProductRepositoryImpl;
